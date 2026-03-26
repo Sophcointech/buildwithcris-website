@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud vs Local AI Cost Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #f8f9fc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --bg-input: #f1f4f9;
+    --border: #e2e8f0;
+    --border-active: #3b82f6;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-blue-glow: rgba(37, 99, 235, 0.08);
+    --accent-green: #059669;
+    --accent-green-glow: rgba(5, 150, 105, 0.08);
+    --accent-amber: #d97706;
+    --accent-red: #dc2626;
+    --cloud-color: #7c3aed;
+    --cloud-glow: rgba(124, 58, 237, 0.07);
+    --local-color: #059669;
+    --local-glow: rgba(5, 150, 105, 0.07);
+    --pro-color: #b45309;
+    --pro-glow: rgba(180, 83, 9, 0.07);
+    --consumer-color: #2563eb;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 48px; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    background: var(--accent-blue-glow);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 100px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent-blue);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .header-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent-blue); border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .header h1 {
+    font-size: clamp(28px,4vw,42px); font-weight: 700; line-height: 1.15;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    font-size: 16px; color: var(--text-secondary);
+    max-width: 620px; margin: 0 auto; line-height: 1.6;
+  }
+
+  /* Layout */
+  .layout {
+    display: grid; grid-template-columns: 400px 1fr; gap: 32px; align-items: start;
+  }
+  @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
+
+  /* Card */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .card-title {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: ''; width: 12px; height: 2px;
+    background: var(--accent-blue); border-radius: 1px;
+  }
+
+  /* Path toggle */
+  .path-toggle-wrap { margin-bottom: 24px; }
+  .path-toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: 10px; padding: 3px; gap: 3px;
+  }
+  .path-btn {
+    padding: 10px 8px; border: none; border-radius: 8px;
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.25s ease;
+    background: transparent; color: var(--text-muted);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .path-btn .path-sub {
+    font-size: 10px; font-weight: 400; opacity: 0.7;
+    font-family: var(--font-mono);
+  }
+  .path-btn.active-consumer {
+    background: rgba(59,130,246,0.15); color: var(--consumer-color);
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+  .path-btn.active-pro {
+    background: var(--pro-glow); color: var(--pro-color);
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .path-btn:not([class*="active-"]) { border: 1px solid transparent; }
+  .path-btn:not([class*="active-"]):hover { color: var(--text-secondary); background: rgba(0,0,0,0.03); }
+
+  /* Input groups */
+  .input-group { margin-bottom: 22px; }
+  .input-group:last-child { margin-bottom: 0; }
+  .input-label {
+    display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;
+  }
+  .input-label span:first-child { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .input-value-display {
+    font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--accent-blue);
+  }
+  .input-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  /* Range */
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px;
+    background: var(--bg-input); border-radius: 3px;
+    outline: none; border: 1px solid var(--border); cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent-blue); border: 3px solid #ffffff;
+    box-shadow: 0 0 0 1px var(--accent-blue), 0 2px 8px rgba(37,99,235,0.25);
+    cursor: pointer; transition: transform .15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent-blue); border: 3px solid #ffffff;
+    box-shadow: 0 0 0 1px var(--accent-blue), 0 2px 8px rgba(37,99,235,0.25);
+    cursor: pointer;
+  }
+
+  /* Tier selector */
+  .tier-selector { display: flex; flex-direction: column; gap: 8px; }
+  .tier-option {
+    position: relative; display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; background: var(--bg-input);
+    border: 1px solid var(--border); border-radius: 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tier-option:hover { border-color: rgba(59,130,246,0.3); background: var(--bg-card-hover); }
+  .tier-option.active { border-color: var(--accent-blue); background: var(--accent-blue-glow); }
+  .tier-option input[type="radio"] { display: none; }
+  .tier-radio {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--text-muted); flex-shrink: 0;
+    transition: all 0.2s; position: relative;
+  }
+  .tier-option.active .tier-radio { border-color: var(--accent-blue); }
+  .tier-option.active .tier-radio::after {
+    content: ''; position: absolute; inset: 3px;
+    background: var(--accent-blue); border-radius: 50%;
+  }
+  .tier-info { flex: 1; min-width: 0; }
+  .tier-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .tier-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.35; }
+  .tier-price {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    color: var(--accent-blue); flex-shrink: 0;
+  }
+  .tier-badges {
+    display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;
+  }
+  .tier-badge {
+    font-family: var(--font-mono); font-size: 9px;
+    padding: 2px 6px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tier-badge.vram { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+  .tier-badge.power { background: rgba(16,185,129,0.12); color: var(--accent-green); }
+  .tier-badge.ecc { background: var(--pro-glow); color: var(--pro-color); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* Results */
+  .results-area { display: flex; flex-direction: column; gap: 24px; }
+
+  /* Verdict */
+  .verdict-banner {
+    padding: 20px 24px; border-radius: 14px;
+    display: flex; align-items: center; gap: 16px; transition: all 0.4s;
+  }
+  .verdict-banner.local-wins { background: var(--local-glow); border: 1px solid rgba(16,185,129,0.25); }
+  .verdict-banner.cloud-wins { background: var(--cloud-glow); border: 1px solid rgba(139,92,246,0.25); }
+  .verdict-banner.borderline { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+  .verdict-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .local-wins .verdict-icon { background: rgba(16,185,129,0.15); }
+  .cloud-wins .verdict-icon { background: rgba(139,92,246,0.15); }
+  .borderline .verdict-icon { background: rgba(245,158,11,0.15); }
+  .verdict-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .local-wins .verdict-text h3 { color: var(--accent-green); }
+  .cloud-wins .verdict-text h3 { color: var(--cloud-color); }
+  .borderline .verdict-text h3 { color: var(--accent-amber); }
+  .verdict-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  @media (max-width: 600px) { .stats-row { grid-template-columns: 1fr; } }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .stat-label {
+    font-size: 11px; font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .stat-value { font-family: var(--font-mono); font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .stat-value.green { color: var(--accent-green); }
+  .stat-value.blue { color: var(--accent-blue); }
+  .stat-value.amber { color: var(--accent-amber); }
+  .stat-value.red { color: var(--accent-red); }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Chart */
+  .chart-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .chart-title {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); display: flex; align-items: center; gap: 8px;
+  }
+  .chart-title::before {
+    content: ''; width: 12px; height: 2px;
+    background: var(--accent-green); border-radius: 1px;
+  }
+  .chart-legend { display: flex; gap: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-dot.cloud { background: #7c3aed; }
+  .legend-dot.local { background: #059669; }
+  canvas { width: 100% !important; height: 320px !important; }
+
+  /* Breakdown */
+  .breakdown-table { width: 100%; border-collapse: collapse; }
+  .breakdown-table th {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); text-align: left;
+    padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500;
+  }
+  .breakdown-table th:last-child, .breakdown-table td:last-child { text-align: right; }
+  .breakdown-table td {
+    padding: 12px; font-size: 14px; color: var(--text-secondary);
+    border-bottom: 1px solid rgba(226,232,240,0.8);
+  }
+  .breakdown-table td:last-child { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
+  .breakdown-table tr.total-row td {
+    border-bottom: none; padding-top: 14px;
+    font-weight: 700; color: var(--text-primary); font-size: 15px;
+  }
+  .breakdown-table tr.total-row td:last-child { color: var(--accent-green); }
+  .breakdown-table tr.total-row.negative td:last-child { color: var(--accent-red); }
+
+  /* Path info bar */
+  .path-info {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: 10px;
+    font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+  }
+  .path-info.consumer-info {
+    background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
+  }
+  .path-info.pro-info {
+    background: var(--pro-glow); border: 1px solid rgba(245,158,11,0.2);
+  }
+  .path-info-icon { font-size: 20px; flex-shrink: 0; }
+  .path-info strong { color: var(--text-primary); }
+
+  /* Footer CTA */
+  .footer-cta {
+    text-align: center; padding: 32px;
+    background: linear-gradient(135deg, var(--accent-blue-glow), var(--local-glow));
+    border: 1px solid rgba(59,130,246,0.15); border-radius: 16px;
+  }
+  .footer-cta h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .footer-cta p { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+  .cta-button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; background: var(--accent-blue); color: white;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .cta-button:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-badge">Interactive Tool</div>
+    <h1>Cloud vs Local AI<br>Cost Calculator</h1>
+    <p>Find out if owning your AI infrastructure makes financial sense. Choose your build path, adjust the sliders, and see the break-even point.</p>
+  </div>
+
+  <div class="layout">
+    <!-- INPUT PANEL -->
+    <div>
+      <div class="card">
+        <div class="card-title">Your Cloud AI Spend</div>
+        <div class="input-group">
+          <div class="input-label">
+            <span>Monthly API / subscription cost</span>
+            <span class="input-value-display" id="cloud-cost-display">$800</span>
+          </div>
+          <input type="range" id="cloud-cost" min="100" max="5000" step="50" value="800">
+          <div class="input-hint">Include all AI API costs, ChatGPT seats, Copilot licenses, etc.</div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span>Expected monthly growth</span>
+            <span class="input-value-display" id="growth-display">5%</span>
+          </div>
+          <input type="range" id="growth-rate" min="0" max="25" step="1" value="5">
+          <div class="input-hint">How fast is your AI usage growing? Most SMBs see 5–15%/month.</div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="card-title">Build Path</div>
+
+        <div class="path-toggle-wrap">
+          <div class="path-toggle">
+            <button class="path-btn active-consumer" id="btn-consumer" onclick="setPath('consumer')">
+              GeForce GPUs
+              <span class="path-sub">Consumer / Gaming</span>
+            </button>
+            <button class="path-btn" id="btn-pro" onclick="setPath('pro')">
+              RTX PRO Blackwell
+              <span class="path-sub">Workstation</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="path-info-consumer" class="path-info consumer-info">
+          <span class="path-info-icon">🔧</span>
+          <span>GeForce consumer GPUs. Budget tier uses a used RTX 3090. Higher tiers use new RTX 5090s with 3-year warranty.</span>
+        </div>
+        <div id="path-info-pro" class="path-info pro-info" style="display:none">
+          <span class="path-info-icon">🏢</span>
+          <span><strong>RTX PRO Blackwell.</strong> ECC memory, 3-year warranty, pro drivers, ISV certified. Built for business.</span>
+        </div>
+
+        <div style="height:16px"></div>
+
+        <div class="tier-selector" id="tier-selector"></div>
+        <div class="input-hint" style="margin-top:12px; font-style:italic;">* Estimated total system costs (GPU + platform). Actual prices vary by vendor and availability.</div>
+
+        <div class="divider"></div>
+        <div class="input-group">
+          <div class="input-label">
+            <span>Electricity cost (per kWh)</span>
+            <span class="input-value-display" id="elec-display">$0.13</span>
+          </div>
+          <input type="range" id="elec-cost" min="0.05" max="0.40" step="0.01" value="0.13">
+          <div class="input-hint">US average is ~$0.13/kWh. Check your utility bill.</div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span>Daily server runtime</span>
+            <span class="input-value-display" id="runtime-display">10 hrs</span>
+          </div>
+          <input type="range" id="runtime" min="2" max="24" step="1" value="10">
+          <div class="input-hint">Hours per day the server is actually running inference.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div class="results-area" id="results">
+      <div class="verdict-banner local-wins" id="verdict-banner">
+        <div class="verdict-icon" id="verdict-icon">🖥️</div>
+        <div class="verdict-text">
+          <h3 id="verdict-title">Local AI Saves You Money</h3>
+          <p id="verdict-desc">Loading...</p>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Break-Even</div>
+          <div class="stat-value amber" id="stat-breakeven">—</div>
+          <div class="stat-sub" id="stat-breakeven-sub">hardware pays for itself</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">24-Month Savings</div>
+          <div class="stat-value green" id="stat-savings">—</div>
+          <div class="stat-sub">vs staying on cloud</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Local Monthly Cost</div>
+          <div class="stat-value blue" id="stat-monthly">—</div>
+          <div class="stat-sub">electricity only</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">24-Month Cumulative Cost</div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot cloud"></div> Cloud AI</div>
+            <div class="legend-item"><div class="legend-dot local"></div> Local AI</div>
+          </div>
+        </div>
+        <canvas id="cost-chart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cost Breakdown — 24 Months</div>
+        <table class="breakdown-table">
+          <thead><tr><th>Item</th><th>Amount</th></tr></thead>
+          <tbody id="breakdown-body"></tbody>
+        </table>
+      </div>
+
+      <div class="footer-cta">
+        <h3>Not sure which path is right?</h3>
+        <p>Book a free 30-minute assessment. We'll review your usage, data sensitivity, and budget to recommend the right build.</p>
+        <a href="#" class="cta-button">Book a Free Assessment →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function() {
+  const TIERS = {
+    consumer: [
+      { cost: 2200, power: 380, label: 'Budget', name: 'Budget Build', gpu: '1x Used RTX 3090', vram: '24GB', desc: '7B–13B models · 1–2 users · Refurb workstation · Used GPU', badges: [{t:'24GB',c:'vram'},{t:'380W',c:'power'}] },
+      { cost: 5500, power: 650, label: 'Workhorse', name: 'Workhorse Build', gpu: '1x RTX 5090', vram: '32GB', desc: '30B native, 70B quantized · 5–15 users · New w/ 3yr warranty', badges: [{t:'32GB',c:'vram'},{t:'575W GPU',c:'power'}] },
+      { cost: 13000, power: 1250, label: 'Departmental', name: 'Departmental Server', gpu: '2x RTX 5090', vram: '64GB total', desc: '70B native · 10–20 users · New w/ 3yr warranty', badges: [{t:'64GB',c:'vram'},{t:'1.15kW GPU',c:'power'}] },
+      { cost: 25000, power: 2450, label: 'Enterprise', name: 'Multi-GPU Platform', gpu: '4x RTX 5090', vram: '128GB total', desc: 'Multiple models · 50+ users · Server platform · New w/ 3yr warranty', badges: [{t:'128GB',c:'vram'},{t:'2.3kW GPU',c:'power'}] },
+    ],
+    pro: [
+      { cost: 3500, power: 170, label: 'Budget', name: 'RTX PRO 4000', gpu: 'RTX PRO 4000 Blackwell', vram: '24GB', desc: '7B–13B models · 1–3 users · Single slot, 140W GPU', badges: [{t:'24GB',c:'vram'},{t:'140W GPU',c:'power'},{t:'ECC',c:'ecc'}] },
+      { cost: 7000, power: 340, label: 'Workhorse', name: 'RTX PRO 5000', gpu: 'RTX PRO 5000 Blackwell', vram: '48GB', desc: '30B native, 70B quantized · 5–15 users · 300W GPU', badges: [{t:'48GB',c:'vram'},{t:'300W GPU',c:'power'},{t:'ECC',c:'ecc'}] },
+      { cost: 13000, power: 650, label: 'Departmental', name: 'RTX PRO 6000', gpu: 'RTX PRO 6000 Blackwell', vram: '96GB', desc: '70B FP8 native · 10–20 users · 600W GPU', badges: [{t:'96GB',c:'vram'},{t:'600W GPU',c:'power'},{t:'ECC',c:'ecc'}] },
+      { cost: 24000, power: 680, label: 'Private AI', name: 'Dual RTX PRO 6000', gpu: '2x RTX PRO 6000 Max-Q', vram: '192GB total', desc: '70B FP16 · Multi-model · 50+ users · 300W each', badges: [{t:'192GB',c:'vram'},{t:'600W total',c:'power'},{t:'ECC',c:'ecc'}] },
+    ]
+  };
+
+  let currentPath = 'consumer';
+  let selectedTierIdx = 0;
+
+  const $ = id => document.getElementById(id);
+  const cloudCostSlider = $('cloud-cost');
+  const growthSlider = $('growth-rate');
+  const elecSlider = $('elec-cost');
+  const runtimeSlider = $('runtime');
+
+  // Chart
+  const ctx = $('cost-chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length:25},(_,i)=>i),
+      datasets: [
+        { label:'Cloud AI', data:[], borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.06)', fill:true, tension:.3, borderWidth:2.5, pointRadius:0, pointHoverRadius:5, pointHoverBackgroundColor:'#7c3aed' },
+        { label:'Local AI', data:[], borderColor:'#059669', backgroundColor:'rgba(5,150,105,0.06)', fill:true, tension:.3, borderWidth:2.5, pointRadius:0, pointHoverRadius:5, pointHoverBackgroundColor:'#059669' }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{intersect:false, mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#ffffff', borderColor:'#e2e8f0', borderWidth:1,
+          titleFont:{family:"'JetBrains Mono',monospace",size:11},
+          titleColor:'#1e293b',
+          bodyFont:{family:"'DM Sans',sans-serif",size:13},
+          bodyColor:'#475569',
+          padding:12, cornerRadius:8,
+          boxShadow:'0 4px 12px rgba(0,0,0,0.1)',
+          callbacks:{ title:i=>'Month '+i[0].label, label:i=>i.dataset.label+': $'+i.raw.toLocaleString() }
+        }
+      },
+      scales:{
+        x:{ title:{display:true,text:'Month',color:'#94a3b8',font:{family:"'JetBrains Mono',monospace",size:11}}, ticks:{color:'#94a3b8',font:{family:"'JetBrains Mono',monospace",size:10}}, grid:{color:'rgba(226,232,240,0.6)'}, border:{color:'#e2e8f0'} },
+        y:{ title:{display:true,text:'Cumulative Cost ($)',color:'#94a3b8',font:{family:"'JetBrains Mono',monospace",size:11}}, ticks:{color:'#94a3b8',font:{family:"'JetBrains Mono',monospace",size:10},callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)}, grid:{color:'rgba(226,232,240,0.6)'}, border:{color:'#e2e8f0'} }
+      }
+    }
+  });
+
+  function renderTiers() {
+    const tiers = TIERS[currentPath];
+    const container = $('tier-selector');
+    container.innerHTML = '';
+    tiers.forEach((t, i) => {
+      const el = document.createElement('label');
+      el.className = 'tier-option' + (i === selectedTierIdx ? ' active' : '');
+      const priceStr = t.cost >= 1000 ? '$' + (t.cost/1000).toFixed(t.cost%1000===0?0:1) + 'K' : '$'+t.cost;
+      el.innerHTML = `
+        <input type="radio" name="tier" value="${i}" ${i===selectedTierIdx?'checked':''}>
+        <div class="tier-radio"></div>
+        <div class="tier-info">
+          <div class="tier-name">${t.name}</div>
+          <div class="tier-desc">${t.gpu} · ${t.desc}</div>
+          <div class="tier-badges">${t.badges.map(b=>'<span class="tier-badge '+b.c+'">'+b.t+'</span>').join('')}</div>
+        </div>
+        <div class="tier-price">${priceStr}</div>`;
+      el.addEventListener('click', () => {
+        selectedTierIdx = i;
+        renderTiers();
+        recalculate();
+      });
+      container.appendChild(el);
+    });
+  }
+
+  window.setPath = function(path) {
+    currentPath = path;
+    selectedTierIdx = 0;
+    $('btn-consumer').className = 'path-btn' + (path==='consumer' ? ' active-consumer' : '');
+    $('btn-pro').className = 'path-btn' + (path==='pro' ? ' active-pro' : '');
+    $('path-info-consumer').style.display = path==='consumer' ? 'flex' : 'none';
+    $('path-info-pro').style.display = path==='pro' ? 'flex' : 'none';
+    renderTiers();
+    recalculate();
+  };
+
+  function recalculate() {
+    const tier = TIERS[currentPath][selectedTierIdx];
+    const monthlyCost = parseFloat(cloudCostSlider.value);
+    const growthRate = parseFloat(growthSlider.value) / 100;
+    const elecRate = parseFloat(elecSlider.value);
+    const hours = parseFloat(runtimeSlider.value);
+    const hwCost = tier.cost;
+    const watts = tier.power;
+
+    $('cloud-cost-display').textContent = '$' + monthlyCost.toLocaleString();
+    $('growth-display').textContent = growthSlider.value + '%';
+    $('elec-display').textContent = '$' + elecRate.toFixed(2);
+    $('runtime-display').textContent = hours + ' hrs';
+
+    const monthlyElec = (watts / 1000) * hours * 30 * elecRate;
+    const cloudCosts = [0]; const localCosts = [hwCost];
+    let cloudCum = 0, localCum = hwCost, breakEven = null;
+
+    for (let m = 1; m <= 24; m++) {
+      const mc = monthlyCost * Math.pow(1 + growthRate, m - 1);
+      cloudCum += mc; localCum += monthlyElec;
+      cloudCosts.push(Math.round(cloudCum));
+      localCosts.push(Math.round(localCum));
+      if (!breakEven && cloudCum >= localCum) breakEven = m;
+    }
+
+    const totalCloud = cloudCosts[24], totalLocal = localCosts[24];
+    const savings = totalCloud - totalLocal;
+
+    chart.data.datasets[0].data = cloudCosts;
+    chart.data.datasets[1].data = localCosts;
+    chart.update('none');
+
+    $('stat-breakeven').textContent = breakEven ? breakEven + ' mo' : '24+ mo';
+    $('stat-breakeven-sub').textContent = breakEven ? 'hardware pays for itself' : 'doesn\'t pay off in 24 months';
+    $('stat-savings').textContent = (savings >= 0 ? '$' : '-$') + Math.abs(savings).toLocaleString();
+    $('stat-savings').className = 'stat-value ' + (savings >= 0 ? 'green' : 'red');
+    $('stat-monthly').textContent = '$' + Math.round(monthlyElec).toLocaleString();
+
+    const banner = $('verdict-banner'), icon = $('verdict-icon');
+    const title = $('verdict-title'), desc = $('verdict-desc');
+    const pathLabel = currentPath === 'pro' ? 'RTX PRO ' + tier.name : tier.name;
+
+    if (breakEven && breakEven <= 12) {
+      banner.className = 'verdict-banner local-wins';
+      icon.textContent = '🖥️'; title.textContent = 'Local AI Saves You Money';
+      desc.textContent = `The ${pathLabel} breaks even at month ${breakEven}. Over 24 months you save $${savings.toLocaleString()} — and you own the hardware.`;
+    } else if (breakEven && breakEven <= 18) {
+      banner.className = 'verdict-banner borderline';
+      icon.textContent = '⚖️'; title.textContent = 'Close Call — Local Probably Wins';
+      desc.textContent = `Break-even at month ${breakEven} with $${savings.toLocaleString()} in savings. Factor in data privacy and uptime control to tip the decision.`;
+    } else if (breakEven && breakEven <= 24) {
+      banner.className = 'verdict-banner borderline';
+      icon.textContent = '⚖️'; title.textContent = 'Borderline — Consider Non-Financial Benefits';
+      desc.textContent = `Break-even at month ${breakEven}. Financial savings of $${savings.toLocaleString()} are thin — privacy, uptime, and control may justify it.`;
+    } else {
+      banner.className = 'verdict-banner cloud-wins';
+      icon.textContent = '☁️'; title.textContent = 'Cloud AI Makes More Sense (For Now)';
+      desc.textContent = `At your current spend, the ${pathLabel} doesn't pay for itself in 24 months. Revisit when costs grow, or try a smaller build.`;
+    }
+
+    const cm24 = Math.round(monthlyCost * Math.pow(1 + growthRate, 23));
+    const negClass = savings < 0 ? ' negative' : '';
+    $('breakdown-body').innerHTML = `
+      <tr><td>☁️ Cloud: 24-month total</td><td>$${totalCloud.toLocaleString()}</td></tr>
+      <tr><td>　 Starting monthly cost</td><td>$${monthlyCost.toLocaleString()}/mo</td></tr>
+      <tr><td>　 Month 24 cost (with ${(growthRate*100).toFixed(0)}% growth)</td><td>$${cm24.toLocaleString()}/mo</td></tr>
+      <tr><td colspan="2" style="border-bottom:1px solid var(--border);padding:4px"></td></tr>
+      <tr><td>🖥️ Local: 24-month total</td><td>$${totalLocal.toLocaleString()}</td></tr>
+      <tr><td>　 Hardware (${tier.gpu})</td><td>$${hwCost.toLocaleString()}</td></tr>
+      <tr><td>　 Electricity (24 months × $${Math.round(monthlyElec)}/mo)</td><td>$${Math.round(monthlyElec*24).toLocaleString()}</td></tr>
+      <tr><td colspan="2" style="border-bottom:1px solid var(--border);padding:4px"></td></tr>
+      <tr class="total-row${negClass}"><td>💰 Net savings going local</td><td>${savings>=0?'+':'-'}$${Math.abs(savings).toLocaleString()}</td></tr>`;
+  }
+
+  [cloudCostSlider, growthSlider, elecSlider, runtimeSlider].forEach(s => s.addEventListener('input', recalculate));
+  renderTiers();
+  recalculate();
+})();
+</script>
+</body>
+</html>

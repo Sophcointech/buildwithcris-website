@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildWithCris — AI Infrastructure for Businesses That Want to Own Their AI</title>
+<meta name="description" content="Cristobal Rodriguez helps small businesses deploy private AI infrastructure. 20+ years of enterprise IT experience. Local AI servers, automation, and consulting.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafbfe;
+    --bg-alt: #f0f3f9;
+    --bg-card: #ffffff;
+    --border: #e1e6ef;
+    --text-dark: #111827;
+    --text-body: #374151;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
+    --accent: #1d4ed8;
+    --accent-light: #3b82f6;
+    --accent-glow: rgba(29, 78, 216, 0.06);
+    --accent-green: #059669;
+    --accent-amber: #b45309;
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Source Sans 3', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --max-w: 1120px;
+    --radius: 14px;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Utility */
+  .container { max-width: var(--max-w); margin: 0 auto; padding: 0 28px; }
+  .section { padding: 100px 0; }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin-bottom: 18px;
+  }
+  .section-intro {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.65;
+    margin-bottom: 48px;
+  }
+
+  /* ========== NAV ========== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250, 251, 254, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow 0.3s;
+  }
+  nav.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+  .nav-inner {
+    max-width: var(--max-w); margin: 0 auto; padding: 0 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    height: 64px;
+  }
+  .nav-brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--text-dark);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-brand .brand-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text-dark); }
+  .nav-cta {
+    padding: 8px 20px;
+    background: var(--accent);
+    color: white !important;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+  }
+  .nav-cta:hover { background: #1e40af !important; transform: translateY(-1px); }
+  @media (max-width: 700px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* ========== HERO ========== */
+  .hero {
+    padding: 160px 0 120px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(29,78,216,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(5,150,105,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative; z-index: 1;
+    max-width: 720px;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 2px;
+    background: var(--accent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 800;
+    color: var(--text-dark);
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .hero-desc {
+    font-size: 19px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 40px;
+    max-width: 560px;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px rgba(29,78,216,0.2);
+  }
+  .btn-primary:hover { background: #1e40af; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(29,78,216,0.25); }
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-dark);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent-light); color: var(--accent); }
+
+  /* Credibility strip */
+  .cred-strip {
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .cred-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .cred-number {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    line-height: 1;
+  }
+  .cred-label {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+
+  /* ========== ABOUT ========== */
+  .about-section { background: var(--bg-alt); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (max-width: 768px) {
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+  .about-text p {
+    margin-bottom: 18px;
+    color: var(--text-body);
+  }
+  .about-text p:last-child { margin-bottom: 0; }
+  .about-text strong { color: var(--text-dark); }
+  .about-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .about-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .about-card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  .about-card h4 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+  }
+  .about-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ========== SERVICES ========== */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 768px) {
+    .services-grid { grid-template-columns: 1fr; }
+  }
+  .service-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card:hover {
+    border-color: var(--accent-light);
+    box-shadow: 0 4px 20px rgba(29,78,216,0.08);
+    transform: translateY(-2px);
+  }
+  .service-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .service-card:hover::after { opacity: 1; }
+  .service-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  .service-icon.blue { background: var(--accent-glow); }
+  .service-icon.green { background: rgba(5,150,105,0.07); }
+  .service-icon.amber { background: rgba(180,83,9,0.07); }
+  .service-card h3 {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+  }
+  .service-card p {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .service-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .service-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--bg-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ========== CONTENT SERIES ========== */
+  .content-section { background: var(--bg-alt); }
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 768px) {
+    .content-grid { grid-template-columns: 1fr; }
+  }
+  .content-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    transition: all 0.3s;
+  }
+  .content-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .content-thumb {
+    height: 180px;
+    background: linear-gradient(135deg, var(--accent-glow), rgba(5,150,105,0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .content-thumb .ep-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    background: var(--accent);
+    color: white;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .content-body {
+    padding: 24px;
+  }
+  .content-card h3 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+  .content-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* ========== CTA ========== */
+  .cta-section {
+    background: var(--text-dark);
+    color: white;
+    text-align: center;
+    padding: 100px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .cta-content {
+    position: relative; z-index: 1;
+    max-width: 600px; margin: 0 auto;
+  }
+  .cta-section h2 {
+    color: white;
+    font-size: clamp(28px, 3.5vw, 42px);
+    margin-bottom: 16px;
+  }
+  .cta-section p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .btn-cta {
+    background: white;
+    color: var(--text-dark);
+    padding: 16px 36px;
+    font-size: 16px;
+  }
+  .btn-cta:hover { background: #f1f5f9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(255,255,255,0.15); }
+
+  /* ========== FOOTER ========== */
+  footer {
+    background: var(--text-dark);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 40px 28px;
+    text-align: center;
+  }
+  footer p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+  }
+  footer a {
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+  }
+  footer a:hover { color: white; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up {
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .fade-up.d1 { animation-delay: 0.1s; }
+  .fade-up.d2 { animation-delay: 0.2s; }
+  .fade-up.d3 { animation-delay: 0.3s; }
+  .fade-up.d4 { animation-delay: 0.4s; }
+  .fade-up.d5 { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <span class="brand-mark">BC</span>
+      BuildWithCris
+    </a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#content">Content</a>
+      <a href="#contact" class="nav-cta">Book Assessment</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow fade-up">Cristobal Rodriguez</div>
+      <h1 class="fade-up d1">I help businesses <em>own their AI</em> instead of renting it</h1>
+      <p class="hero-desc fade-up d2">20 years building enterprise infrastructure for local, state, and federal agencies. Now I help small businesses deploy private AI servers, automate their operations, and stop sending their data to the cloud.</p>
+      <div class="hero-actions fade-up d3">
+        <a href="#contact" class="btn btn-primary">Book a Free Assessment →</a>
+        <a href="#content" class="btn btn-secondary">Watch the Series ▶</a>
+      </div>
+      <div class="cred-strip fade-up d4">
+        <div class="cred-item">
+          <span class="cred-number">20+</span>
+          <span class="cred-label">Years in IT</span>
+        </div>
+        <div class="cred-item">
+          <span class="cred-number">Gov</span>
+          <span class="cred-label">IRS, Dept. of Labor, Ex-Im Bank</span>
+        </div>
+        <div class="cred-item">
+          <span class="cred-number">Hybrid</span>
+          <span class="cred-label">On-Prem, Azure, AWS</span>
+        </div>
+        <div class="cred-item">
+          <span class="cred-number">DC</span>
+          <span class="cred-label">Based in Washington</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about-section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-label">About</div>
+        <h2>Not another AI hype channel</h2>
+        <p>I'm Cristobal Rodriguez — a systems architect who's spent two decades in server rooms, data centers, and government agencies building infrastructure that can't fail.</p>
+        <p>Now I'm on a mission to help small businesses understand <strong>when local AI makes sense, when cloud AI makes sense, and how to build the right thing without wasting money</strong>.</p>
+        <p>I build on camera so you can learn. I consult off camera so you can deploy. Every recommendation I make is something I've tested in my own lab first.</p>
+      </div>
+      <div class="about-cards">
+        <div class="about-card">
+          <div class="about-card-icon">🏗️</div>
+          <h4>Builder First</h4>
+          <p>I don't just talk about AI servers — I build them, test them, and run production workloads on them.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🏛️</div>
+          <h4>Enterprise Background</h4>
+          <p>On-prem Software Defined Datacenters, hybrid clouds extending to Azure and AWS — 20 years of infrastructure that has to work.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🔒</div>
+          <h4>Privacy Focused</h4>
+          <p>Your data should stay yours. I help businesses run AI without sending sensitive info to third parties.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">📊</div>
+          <h4>Honest Math</h4>
+          <p>I'll tell you when cloud AI is the better choice. Not every business needs a server under their desk.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="section-label">Services</div>
+    <h2>What I can build for you</h2>
+    <p class="section-intro">From a 30-minute assessment to a fully deployed private AI server, I meet you where you are.</p>
+    <div class="services-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="service-card">
+        <div class="service-icon blue">🔍</div>
+        <h3>AI Readiness Assessment</h3>
+        <p>A clear-eyed look at your current AI spend, data sensitivity, and team readiness. You'll leave with a recommendation — local, cloud, or hybrid — backed by real math.</p>
+        <div class="service-tags">
+          <span class="service-tag">30 min</span>
+          <span class="service-tag">Free</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon green">🖥️</div>
+        <h3>Local AI Server Build & Deploy</h3>
+        <p>I spec the hardware, build the server, configure the AI stack (Ollama, Open WebUI, RAG pipelines), and onboard your team. You own everything when I'm done.</p>
+        <div class="service-tags">
+          <span class="service-tag">$2K–$5K</span>
+          <span class="service-tag">1–2 weeks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT SERIES -->
+<section class="section content-section" id="content">
+  <div class="container">
+    <div class="section-label">Content</div>
+    <h2>The Local AI Series</h2>
+    <p class="section-intro">Free videos and guides helping you decide if private AI makes sense for your business — and exactly how to build it if it does.</p>
+    <div class="content-grid">
+      <div class="content-card">
+        <div class="content-thumb">
+          <span class="ep-badge">EP 01</span>
+          🤔
+        </div>
+        <div class="content-body">
+          <h3>Should Your Business Buy an AI Server?</h3>
+          <p>The brutally honest breakdown. When local wins, when cloud wins, and how to decide without wasting money.</p>
+        </div>
+      </div>
+      <div class="content-card">
+        <div class="content-thumb">
+          <span class="ep-badge">EP 02</span>
+          💸
+        </div>
+        <div class="content-body">
+          <h3>The Hidden Costs of Cloud AI</h3>
+          <p>Token creep, data privacy, vendor lock-in, downtime, and the feature treadmill. What nobody tells you about API costs.</p>
+        </div>
+      </div>
+      <div class="content-card">
+        <div class="content-thumb">
+          <span class="ep-badge">EP 03</span>
+          💰
+        </div>
+        <div class="content-body">
+          <h3>$2K vs $5K vs $13K AI Servers</h3>
+          <p>What each budget tier actually gets you — organized by business capability, not GPU specs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-content">
+    <h2>Ready to own your AI?</h2>
+    <p>Book a free 30-minute assessment. I'll review your current AI spend, data sensitivity, and team size — then tell you honestly whether local AI makes sense for your business.</p>
+    <a href="#" class="btn btn-cta">Book a Free Assessment →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 BuildWithCris — Cristobal Rodriguez — Sophcointech Inc. &nbsp;|&nbsp; <a href="#">YouTube</a> &nbsp;|&nbsp; <a href="#">LinkedIn</a> &nbsp;|&nbsp; <a href="#">Contact</a></p>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+</script>
+</body>
+</html>
